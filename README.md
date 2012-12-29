@@ -1,6 +1,6 @@
 What
 ============
-CFUnitTestable is a small Sublime plugin that can be used to analyze CF Components.
+CFUnitTestable is a small Sublime plugin that can be used to analyze Coldfusion Components.
 This tool quickly determines which methods can be unit tested, what dependencies need to be mocked, and provides a resolution for methods that can not be unit tested.
 
 To get familiar with unit testing, mocking and dependencies in Coldfusion, visit http://mxunit.org/
