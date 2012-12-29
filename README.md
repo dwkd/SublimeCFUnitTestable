@@ -18,10 +18,10 @@ Installing
 
 How to use
 ============
-Simply open the CFC to be inspected and press the following key combination:
-Windows: CTRL + ALT + U
-Linux: CTRL + ALT + U
-Mac: SUPER + ALT + U
+Simply open the CFC to be inspected and press the following key combination:<br/>
+Windows: CTRL + ALT + U<br/>
+Linux: CTRL + ALT + U<br/>
+Mac: SUPER + ALT + U<br/>
 
 License
 =======
