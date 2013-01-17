@@ -10,10 +10,10 @@ Installing
 ============
 1. Download the project from github. (Press the Zip button.)
 2. Open the downloaded zip file.
-3. Select and copy the folder dwkd-SublimeCFUnitTestable....
+3. Select and copy the folder SublimeCFUnitTestable-master....
 4. Open Sublime Text Editor
 5. Under the Preferences menu, press Browse Packages....
-6. Paste the folder dwkd-SublimeCFUnitTestable... to the Packages directory.
+6. Paste the folder SublimeCFUnitTestable-master... to the Packages directory.
 7. Restart Sublime
 
 How to use
