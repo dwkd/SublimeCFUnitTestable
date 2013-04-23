@@ -16,6 +16,16 @@ Installing
 6. Paste the folder SublimeCFUnitTestable-master... to the Packages directory.
 7. Restart Sublime
 
+Updating
+========
+1. Open Sublime and hit CTRL+`(tilde) to show the console.
+2. Copy and paste the code below in the console input and hit ENTER
+!WARNING - the code below implies that your folder for this tool is named 'SublimeCFUnitTestable-master' and the py file is called 'cfunittestable.py'. Please modify this code accordingly if that's not the case.
+
+<div style="background:#f3f3f3; padding:15px;">
+	import urllib2,os; CFUnitTestable_dirName='SublimeCFUnitTestable-master'; CFUnitTestable_fileName='cfunittestable.py'; ipp=sublime.packages_path(); os.makedirs(os.path.join(ipp,CFUnitTestable_dirName)) if not os.path.exists(os.path.join(ipp,CFUnitTestable_dirName)) else None; urllib2.install_opener(urllib2.build_opener(urllib2.ProxyHandler())); open(os.path.join(ipp,CFUnitTestable_dirName,CFUnitTestable_fileName),'wb').write(urllib2.urlopen('https://raw.github.com/dwkd/SublimeCFUnitTestable/master/cfunittestable.py').read());	
+</div>
+
 How to use
 ============
 Simply open the CFC to be inspected and press the following key combination:<br/>
