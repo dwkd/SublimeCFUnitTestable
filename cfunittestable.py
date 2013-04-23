@@ -17,25 +17,43 @@ class cfunittestableCommand(sublime_plugin.TextCommand):
 			h = len(self.view.substr(allregion))
 		
 		#get all functions
-		allMethods = self.view.find_all("<cffunction[\s\S]*?<\/cffunction>", sublime.IGNORECASE)		
-		allPublicMethods = []
-		PrivateAndRemoteIndexes = []
+		allMethods = self.view.find_all("<cffunction[\s\S]*?<\/cffunction>", sublime.IGNORECASE)
+
+		PublicMethodIndexes = []
+		PrivateMethodIndexes = []
+		RemoteMethodIndexes = []
+		PackageMethodIndexes = []
 
 		#loop through functions and find all private and remote functions
 		for idx,method in enumerate(allMethods):
 			methodLineByLine = self.view.split_by_newlines(method)
-			re_accessRemoteOrPrivate = re.compile("access\s*\=\s*[\"\'](remote|private)[\"\']", re.IGNORECASE)
+			re_accessPublic = re.compile("access\s*\=\s*[\"\'](public)[\"\']", re.IGNORECASE)
+			re_accessRemote = re.compile("access\s*\=\s*[\"\'](remote)[\"\']", re.IGNORECASE)
+			re_accessPrivate = re.compile("access\s*\=\s*[\"\'](private)[\"\']", re.IGNORECASE)
+			re_accessPackage = re.compile("access\s*\=\s*[\"\'](package)[\"\']", re.IGNORECASE)
+
 			for line in methodLineByLine:
-				foundAccessRemoteOrPRivate = re_accessRemoteOrPrivate.search(self.view.substr(line))
-				if foundAccessRemoteOrPRivate:
-					PrivateAndRemoteIndexes.append(idx)
+				foundAccessPublic = re_accessPublic.search(self.view.substr(line))
+				if foundAccessPublic:
+					PublicMethodIndexes.append(idx)					
+			
+			for line in methodLineByLine:
+				foundAccessRemote = re_accessRemote.search(self.view.substr(line))
+				if foundAccessRemote:
+					RemoteMethodIndexes.append(idx)					
 
-		#loop through functions and store all public remote methods
-		for idx,method in enumerate(allMethods):			
-			if idx not in PrivateAndRemoteIndexes:
-				allPublicMethods.append(method)
+			for line in methodLineByLine:
+				foundAccessPrivate = re_accessPrivate.search(self.view.substr(line))
+				if foundAccessPrivate:
+					PrivateMethodIndexes.append(idx)
+			
+			for line in methodLineByLine:
+				foundAccessPackage = re_accessPackage.search(self.view.substr(line))
+				if foundAccessPackage:
+					PackageMethodIndexes.append(idx)
 
-		returnMessage += "Methods:\n\t" + str(len(allPublicMethods)) + " Public\n\t" + str(len(PrivateAndRemoteIndexes)) + (" Private and/or Remote\n")
+
+		returnMessage += "Methods:\n\t" + str(len(PublicMethodIndexes)) + " Public\n\t" + str(len(PrivateMethodIndexes)) + " Private\n\t" + str(len(RemoteMethodIndexes)) + " Remote\n\t" + str(len(PackageMethodIndexes)) + " Package"
 		returnMessage += "\nPublic Methods:"
 		returnMessage += "\n==========================================================================================================================\n"
 		
@@ -53,7 +71,7 @@ class cfunittestableCommand(sublime_plugin.TextCommand):
 					break
 
 		#check for dependencies 
-		for method in allPublicMethods:
+		for idx,method in enumerate(allMethods):
 			dependencies = []
 			QueryDependencies = []
 			methodName = ""
@@ -66,6 +84,13 @@ class cfunittestableCommand(sublime_plugin.TextCommand):
 			for line in methodLineByLine:
 
 				#get the method name
+				if not len(methodName) and re_LookFor_MethodName.search(self.view.substr(line)):
+					for splittedItem in self.view.substr(line).split():
+						if re_LookFor_MethodName.search(splittedItem):
+							methodName = re.sub(">","",str(splittedItem))
+							break		
+
+				#get method access
 				if not len(methodName) and re_LookFor_MethodName.search(self.view.substr(line)):
 					for splittedItem in self.view.substr(line).split():
 						if re_LookFor_MethodName.search(splittedItem):
@@ -90,24 +115,28 @@ class cfunittestableCommand(sublime_plugin.TextCommand):
 						dependencies.append("Function dependency found on line " +str(row+1)) # + ": " + re.sub("^[\t ]*?","\t",self.view.substr(line)))
 
 				#look for query dependencies
-				for idx,queryDependency in enumerate(get_allQueryDependencies):
+				for i,queryDependency in enumerate(get_allQueryDependencies):
 					if queryDependency.intersects(line):
 						(row, col) = self.view.rowcol(line.begin())
 						dependencies.append("Query dependency found on line " +str(row+1))# + ": " + re.sub("^[\t ]*?","\t",self.view.substr(line)))
 						QueryDependencies.append("Query dependency found on line " +str(row+1))# + ": " + re.sub("^[\t ]*?","\t",self.view.substr(line)))	
-						del get_allQueryDependencies[idx]
+						del get_allQueryDependencies[i]
 						break
 				
 			#output method name and dependencies
 			functionHeader = ""
-			if len(QueryDependencies):
-				functionHeader = "\n[BAD] Method: " + methodName + "  -  This method can not be unit tested until the query dependencies are moved to DAOs\n"
+			if idx in PackageMethodIndexes:
+				functionHeader = "\n[BAD] Method: " + methodName + " - This method can not be unit tested because it is confined to a package (access=\"package\")\n"
+			elif len(QueryDependencies):
+				functionHeader = "\n[BAD] Method: " + methodName + " - This method can not be unit tested until the query dependencies are moved to DAOs\Gateways\n"
 			else:
-				functionHeader += "\n[OK] Method: " + methodName + "  -  This method can be unit tested\n"
+				functionHeader += "\n[OK] Method: " + methodName + " - This method can be unit tested\n"
 			returnMessage += functionHeader
-			for i in range(1,len(functionHeader)):
+			for k in range(1,len(functionHeader)):
 				returnMessage +="-"
 			returnMessage += "\n"
+			if idx in PrivateMethodIndexes:
+				returnMessage += "(!HINT - This is a private method. Use \"makePublic\" to test it.)\n"
 			if len(dependencies):
 				returnMessage += "Dependencies found. Please mock the following:"
 				for dependency in dependencies:
