@@ -8,7 +8,7 @@ To get familiar with unit testing, mocking and dependencies in Coldfusion, visit
 
 Installing
 ============
-1. Download the project from github. (Press the Zip button.)
+1. Download the project from github. (Press the Download Zip button.)
 2. Open the downloaded zip file.
 3. Select and copy the folder SublimeCFUnitTestable-master....
 4. Open Sublime Text Editor
